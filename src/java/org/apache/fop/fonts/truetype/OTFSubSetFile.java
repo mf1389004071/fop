@@ -806,16 +806,18 @@ public class OTFSubSetFile extends OTFFile {
         //2 byte number of items
         this.writeCard16(dataArray.size());
         //Offset Size: 1 byte = 256, 2 bytes = 65536 etc.
-        int totLength = 0;
+        //Offsets in the offset array are relative to the byte that precedes the object data.
+        //Therefore the first element of the offset array is always 1.
+        int totLength = 1;
         for (int i = 0; i < dataArray.size(); i++) {
             totLength += dataArray.get(i).length;
         }
         int offSize = 1;
-        if (totLength <= (1 << 8)) {
+        if (totLength < (1 << 8)) {
             offSize = 1;
-        } else if (totLength <= (1 << 16)) {
+        } else if (totLength < (1 << 16)) {
             offSize = 2;
-        } else if (totLength <= (1 << 24)) {
+        } else if (totLength < (1 << 24)) {
             offSize = 3;
         } else {
             offSize = 4;
