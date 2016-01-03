@@ -424,6 +424,7 @@ public class OTFSubSetFile extends OTFFile {
             for (int i = 0; i < uniqueGroups.size(); i++) {
                 foundLocalUniques.add(new ArrayList<Integer>());
             }
+            Map<Integer, Integer> gidHintMaskLengths = new HashMap<Integer, Integer>();
             for (int gid : subsetGlyphs.keySet()) {
                 int group = subsetGroups.get(gid);
                 localIndexSubr = cffReader.getFDFonts().get(group).getLocalSubrData();
@@ -435,6 +436,7 @@ public class OTFSubSetFile extends OTFFile {
                 subsetFDSelect.put(subsetGlyphs.get(gid), newFDReference);
                 byte[] data = charStringsIndex.getValue(gid);
                 preScanForSubsetIndexSize(data);
+                gidHintMaskLengths.put(gid, type2Parser.getMaskLength());
             }
 
             //Create the two lists which are to store the local and global subroutines
@@ -461,6 +463,7 @@ public class OTFSubSetFile extends OTFFile {
                 subsetLocalSubrCount = foundLocalUniques.get(subsetFDSelect.get(subsetGlyphs.get(gid))
                         .getNewFDIndex()).size();
                 type2Parser = new Type2Parser();
+                type2Parser.setMaskLength(gidHintMaskLengths.get(gid));
                 data = readCharStringData(data, subsetLocalSubrCount);
                 subsetCharStringsIndex.add(data);
             }
@@ -589,11 +592,12 @@ public class OTFSubSetFile extends OTFFile {
 
         localUniques = new ArrayList<Integer>();
         globalUniques = new ArrayList<Integer>();
-
+        Map<Integer, Integer> gidHintMaskLengths = new HashMap<Integer, Integer>();
         for (int gid : subsetGlyphs.keySet()) {
             type2Parser = new Type2Parser();
             byte[] data = charStringsIndex.getValue(gid);
             preScanForSubsetIndexSize(data);
+            gidHintMaskLengths.put(gid, type2Parser.getMaskLength());
         }
 
         //Store the size of each subset index and clear the unique arrays
@@ -606,6 +610,7 @@ public class OTFSubSetFile extends OTFFile {
             byte[] data = charStringsIndex.getValue(gid);
             type2Parser = new Type2Parser();
             //Retrieve modified char string data and fill local / global subroutine arrays
+            type2Parser.setMaskLength(gidHintMaskLengths.get(gid));
             data = readCharStringData(data, subsetLocalSubrCount);
             subsetCharStringsIndex.add(data);
         }
@@ -621,6 +626,7 @@ public class OTFSubSetFile extends OTFFile {
         private int hstemCount = 0;
         private int vstemCount = 0;
         private int lastOp = -1;
+        private int maskLength = -1;
 
         public void pushOperand(BytesNumber v) {
             stack.add(v);
@@ -643,10 +649,17 @@ public class OTFSubSetFile extends OTFFile {
             return ret;
         }
 
+        public void setMaskLength(int maskLength) {
+            this.maskLength = maskLength;
+        }
+
         public int getMaskLength() {
             // The number of data bytes for mask is exactly the number needed, one
             // bit per hint, to reference the number of stem hints declared
             // at the beginning of the charstring program.
+            if (maskLength > 0) {
+                return maskLength;
+            }
             return 1 + (hstemCount + vstemCount  - 1 ) / 8;
         }
 
@@ -795,18 +808,18 @@ public class OTFSubSetFile extends OTFFile {
     private int getNewRefForReference(int subrNumber, List<Integer> uniquesArray,
             CFFIndexData indexSubr, List<byte[]> subsetIndexSubr, int subrCount) throws IOException {
         int newRef = -1;
-        if (subrNumber < indexSubr.getNumObjects()) {
-            byte[] subr = indexSubr.getValue(subrNumber);
-            subr = readCharStringData(subr, subrCount);
-            if (!uniquesArray.contains(subrNumber)) {
+        if (!uniquesArray.contains(subrNumber)) {
+            if (subrNumber < indexSubr.getNumObjects()) {
+                byte[] subr = indexSubr.getValue(subrNumber);
+                subr = readCharStringData(subr, subrCount);
                 uniquesArray.add(subrNumber);
                 subsetIndexSubr.add(subr);
                 newRef = subsetIndexSubr.size() - 1;
             } else {
-                newRef = uniquesArray.indexOf(subrNumber);
+                throw new IllegalArgumentException("subrNumber out of range");
             }
         } else {
-            throw new IllegalArgumentException("subrNumber out of range");
+            newRef = uniquesArray.indexOf(subrNumber);
         }
         return newRef;
     }
