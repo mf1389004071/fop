@@ -19,6 +19,8 @@
 
 package org.apache.fop.fonts;
 
+import org.apache.fop.fonts.cff.CFFDataReaderTestCase;
+import org.apache.fop.fonts.truetype.OTFSubSetFileTestCase;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
@@ -37,6 +39,8 @@ import org.apache.fop.fonts.truetype.TTFTableNameTestCase;
         FontFileReaderTestCase.class,
         TTFFileTestCase.class,
         TTFSubSetFileTestCase.class,
-        TTFTableNameTestCase.class })
+        TTFTableNameTestCase.class,
+        CFFDataReaderTestCase.class,
+        OTFSubSetFileTestCase.class})
 public final class FOPFontsTestSuite {
 }
