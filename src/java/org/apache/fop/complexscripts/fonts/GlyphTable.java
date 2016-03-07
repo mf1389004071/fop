@@ -171,7 +171,7 @@ public class GlyphTable {
     }
 
     /**
-     * Match lookup specifications according to <script,language,feature> tuple, where
+     * Match lookup specifications according to &lt;script,language,feature&gt; tuple, where
      * '*' is a wildcard for a tuple component.
      * @param script a script identifier
      * @param language a language identifier
@@ -204,7 +204,7 @@ public class GlyphTable {
     }
 
     /**
-     * Match lookup specifications according to <script,language,feature> tuple, where
+     * Match lookup specifications according to &lt;script,language,feature&gt; tuple, where
      * '*' is a wildcard for a tuple component.
      * @param script a script identifier
      * @param language a language identifier
@@ -291,6 +291,34 @@ public class GlyphTable {
         return usa.length > 0;
     }
 
+    @Override
+    /** {@inheritDoc} */
+    public int hashCode() {
+        final int prime = 31;
+        int result = this.frozen ? 1 : 0;
+        result = result * prime + this.lookups.hashCode();
+        result = result * prime + this.lookupTables.hashCode();
+        if (this.gdef != null) {
+            result = result * prime + this.gdef.hashCode();
+        }
+        return result;
+    }
+
+    @Override
+    /** {@inheritDoc} */
+    public boolean equals(Object obj) {
+        if (obj instanceof GlyphTable) {
+            final GlyphTable other = (GlyphTable) obj;
+            return this.lookups.equals(other.lookups)
+                    && this.lookupTables.equals(other.lookupTables)
+                    && (this.gdef == other.gdef     // also covers case where both are null
+                        || (this.gdef != null && this.gdef.equals(other.gdef)))
+                    && this.frozen == other.frozen;
+        } else {
+            return false;
+        }
+    }
+
     /** {@inheritDoc} */
     public String toString() {
         StringBuffer sb = new StringBuffer(super.toString());
@@ -344,7 +372,7 @@ public class GlyphTable {
     }
 
     /**
-     * A structure class encapsulating a lookup specification as a <script,language,feature> tuple.
+     * A structure class encapsulating a lookup specification as a &lt;script,language,feature&gt; tuple.
      */
     public static class LookupSpec implements Comparable {
 
