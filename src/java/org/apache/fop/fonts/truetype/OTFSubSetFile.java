@@ -33,6 +33,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.apache.fontbox.cff.CFFStandardString;
 import org.apache.fontbox.cff.encoding.CFFEncoding;
 
@@ -124,9 +125,9 @@ public class OTFSubSetFile extends OTFFile {
      * Reads and creates a subset of the font.
      *
      * @param in FontFileReader to read from
-     * @param name Name to be checked for in the font file
+     * @param embeddedName Name to be checked for in the font file
      * @param header The header of the font file
-     * @param glyphs Map of glyphs (glyphs has old index as (Integer) key and
+     * @param usedGlyphs Map of glyphs (glyphs has old index as (Integer) key and
      * new index as (Integer) value)
      * @throws IOException in case of an I/O problem
      */
@@ -246,8 +247,8 @@ public class OTFSubSetFile extends OTFFile {
     protected List<Integer> storeFDStrings(List<Integer> uniqueNewRefs) throws IOException {
         ArrayList<Integer> fontNameSIDs = new ArrayList<Integer>();
         List<FontDict> fdFonts = cffReader.getFDFonts();
-        for (int i = 0; i < uniqueNewRefs.size(); i++) {
-            FontDict fdFont = fdFonts.get(uniqueNewRefs.get(i));
+        for (Integer uniqueNewRef : uniqueNewRefs) {
+            FontDict fdFont = fdFonts.get(uniqueNewRef);
             byte[] fdFontByteData = fdFont.getByteData();
             Map<String, DICTEntry> fdFontDict = cffReader.parseDictData(fdFontByteData);
             fontNameSIDs.add(stringIndexData.size() + NUM_STANDARD_STRINGS);
@@ -258,8 +259,8 @@ public class OTFSubSetFile extends OTFFile {
     }
 
     protected void writeBytes(byte[] out) {
-        for (int i = 0; i < out.length; i++) {
-            writeByte(out[i]);
+        for (byte anOut : out) {
+            writeByte(anOut);
         }
     }
 
@@ -421,7 +422,7 @@ public class OTFSubSetFile extends OTFFile {
             subsetFDSelect = new LinkedHashMap<Integer, FDIndexReference>();
 
             List<List<Integer>> foundLocalUniques = new ArrayList<List<Integer>>();
-            for (int i = 0; i < uniqueGroups.size(); i++) {
+            for (Integer uniqueGroup1 : uniqueGroups) {
                 foundLocalUniques.add(new ArrayList<Integer>());
             }
             Map<Integer, Integer> gidHintMaskLengths = new HashMap<Integer, Integer>();
@@ -447,11 +448,11 @@ public class OTFSubSetFile extends OTFFile {
             globalUniques.clear();
             localUniques = null;
 
-            for (int l = 0; l < foundLocalUniques.size(); l++) {
+            for (List<Integer> foundLocalUnique : foundLocalUniques) {
                 fdSubrs.add(new ArrayList<byte[]>());
             }
             List<List<Integer>> foundLocalUniquesB = new ArrayList<List<Integer>>();
-            for (int k = 0; k < uniqueGroups.size(); k++) {
+            for (Integer uniqueGroup : uniqueGroups) {
                 foundLocalUniquesB.add(new ArrayList<Integer>());
             }
             for (Integer gid : subsetGlyphs.keySet()) {
@@ -521,8 +522,8 @@ public class OTFSubSetFile extends OTFFile {
         writeByte(1); //First offset
 
         int count = 1;
-        for (int i = 0; i < uniqueNewRefs.size(); i++) {
-            FontDict fdFont = fdFonts.get(uniqueNewRefs.get(i));
+        for (Integer uniqueNewRef : uniqueNewRefs) {
+            FontDict fdFont = fdFonts.get(uniqueNewRef);
             count += fdFont.getByteData().length;
             writeByte(count);
         }
@@ -623,8 +624,8 @@ public class OTFSubSetFile extends OTFFile {
         protected Log log = LogFactory.getLog(Type2Parser.class);
 
         private ArrayList<BytesNumber> stack = new ArrayList<BytesNumber>();
-        private int hstemCount = 0;
-        private int vstemCount = 0;
+        private int hstemCount;
+        private int vstemCount;
         private int lastOp = -1;
         private int maskLength = -1;
 
@@ -633,7 +634,7 @@ public class OTFSubSetFile extends OTFFile {
         }
 
         public BytesNumber popOperand() {
-            return stack.remove(stack.size() -1);
+            return stack.remove(stack.size() - 1);
         }
 
         public void clearStack() {
@@ -643,7 +644,7 @@ public class OTFSubSetFile extends OTFFile {
         public int[] getOperands(int numbers) {
             int[] ret = new int[numbers];
             while (numbers > 0) {
-                numbers --;
+                numbers--;
                 ret[numbers] = this.popOperand().getNumber();
             }
             return ret;
@@ -660,7 +661,7 @@ public class OTFSubSetFile extends OTFFile {
             if (maskLength > 0) {
                 return maskLength;
             }
-            return 1 + (hstemCount + vstemCount  - 1 ) / 8;
+            return 1 + (hstemCount + vstemCount  - 1) / 8;
         }
 
         public int exec(int b0, byte[] data, int dataPos) {
@@ -668,7 +669,6 @@ public class OTFSubSetFile extends OTFFile {
             if ((b0 >= 0 && b0 <= 27) || (b0 >= 29 && b0 <= 31)) {
                 if (b0 == 12) {
                     dataPos += 1;
-                    int b1 = data[dataPos] & 0xff;
                     log.warn("May not guess the operand count correctly.");
                     posDelta = 1;
                 } else if (b0 == 1 || b0 == 18) {
@@ -707,21 +707,21 @@ public class OTFSubSetFile extends OTFFile {
             if (b0 == 28) {
                 int b1 = input[curPos + 1] & 0xff;
                 int b2 = input[curPos + 2] & 0xff;
-                return new BytesNumber(Integer.valueOf((short) (b1 << 8 | b2)), 3);
+                return new BytesNumber((int) (short) (b1 << 8 | b2), 3);
             } else if (b0 >= 32 && b0 <= 246) {
-                return new BytesNumber(Integer.valueOf(b0 - 139), 1);
+                return new BytesNumber(b0 - 139, 1);
             } else if (b0 >= 247 && b0 <= 250) {
                 int b1 = input[curPos + 1] & 0xff;
-                return new BytesNumber(Integer.valueOf((b0 - 247) * 256 + b1 + 108), 2);
+                return new BytesNumber((b0 - 247) * 256 + b1 + 108, 2);
             } else if (b0 >= 251 && b0 <= 254) {
                 int b1 = input[curPos + 1] & 0xff;
-                return new BytesNumber(Integer.valueOf(-(b0 - 251) * 256 - b1 - 108), 2);
+                return new BytesNumber(-(b0 - 251) * 256 - b1 - 108, 2);
             } else if (b0 == 255) {
                 int b1 = input[curPos + 1] & 0xff;
                 int b2 = input[curPos + 2] & 0xff;
                 int b3 = input[curPos + 3] & 0xff;
                 int b4 = input[curPos + 4] & 0xff;
-                return new BytesNumber(Integer.valueOf((b1 << 24  | b2 << 16 | b3 << 8 | b4)), 5);
+                return new BytesNumber((b1 << 24 | b2 << 16 | b3 << 8 | b4), 5);
             } else {
                 throw new IllegalArgumentException();
             }
@@ -807,7 +807,7 @@ public class OTFSubSetFile extends OTFFile {
 
     private int getNewRefForReference(int subrNumber, List<Integer> uniquesArray,
             CFFIndexData indexSubr, List<byte[]> subsetIndexSubr, int subrCount) throws IOException {
-        int newRef = -1;
+        int newRef;
         if (!uniquesArray.contains(subrNumber)) {
             if (subrNumber < indexSubr.getNumObjects()) {
                 byte[] subr = indexSubr.getValue(subrNumber);
@@ -932,8 +932,8 @@ public class OTFSubSetFile extends OTFFile {
         //Offsets in the offset array are relative to the byte that precedes the object data.
         //Therefore the first element of the offset array is always 1.
         int totLength = 1;
-        for (int i = 0; i < dataArray.size(); i++) {
-            totLength += dataArray.get(i).length;
+        for (byte[] aDataArray1 : dataArray) {
+            totLength += aDataArray1.length;
         }
         int offSize = 1;
         if (totLength < (1 << 8)) {
@@ -985,34 +985,10 @@ public class OTFSubSetFile extends OTFFile {
                 throw new AssertionError("Offset Size was not an expected value.");
             }
         }
-        for (int i = 0; i < dataArray.size(); i++) {
-            writeBytes(dataArray.get(i));
+        for (byte[] aDataArray : dataArray) {
+            writeBytes(aDataArray);
         }
         return hdrTotal + total;
-    }
-
-    private BytesNumber readNumber(int b0, byte[] input, int curPos) throws IOException {
-        if (b0 == 28) {
-            int b1 = input[curPos + 1] & 0xff;
-            int b2 = input[curPos + 2] & 0xff;
-            return new BytesNumber(Integer.valueOf((short) (b1 << 8 | b2)), 3);
-        } else if (b0 >= 32 && b0 <= 246) {
-            return new BytesNumber(Integer.valueOf(b0 - 139), 1);
-        } else if (b0 >= 247 && b0 <= 250) {
-            int b1 = input[curPos + 1] & 0xff;
-            return new BytesNumber(Integer.valueOf((b0 - 247) * 256 + b1 + 108), 2);
-        } else if (b0 >= 251 && b0 <= 254) {
-            int b1 = input[curPos + 1] & 0xff;
-            return new BytesNumber(Integer.valueOf(-(b0 - 251) * 256 - b1 - 108), 2);
-        } else if (b0 == 255) {
-            int b1 = input[curPos + 1] & 0xff;
-            int b2 = input[curPos + 2] & 0xff;
-            int b3 = input[curPos + 3] & 0xff;
-            int b4 = input[curPos + 4] & 0xff;
-            return new BytesNumber(Integer.valueOf((b1 << 24  | b2 << 16 | b3 << 8 | b4)), 5);
-        } else {
-            throw new IllegalArgumentException();
-        }
     }
 
     /**

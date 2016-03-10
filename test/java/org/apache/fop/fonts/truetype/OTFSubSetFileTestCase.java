@@ -21,7 +21,6 @@ package org.apache.fop.fonts.truetype;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -119,14 +118,14 @@ public class OTFSubSetFileTestCase extends OTFFileTestCase {
     static class Context {
         private ArrayList<BytesNumber> operands = new ArrayList<BytesNumber>();
         private ArrayList<BytesNumber> stack = new ArrayList<BytesNumber>();
-        private int hstemCount = 0;
-        private int vstemCount = 0;
+        private int hstemCount;
+        private int vstemCount;
         private int lastOp = -1;
         private int maskLength = -1;
 
         public void pushOperand(BytesNumber v) {
             operands.add(v);
-            if(v instanceof Operator) {
+            if (v instanceof Operator) {
                 if (v.getNumber() != 11 && v.getNumber() != 12) {
                     lastOp = v.getNumber();
                 }
@@ -136,7 +135,7 @@ public class OTFSubSetFileTestCase extends OTFFileTestCase {
         }
 
         public BytesNumber popOperand() {
-            operands.remove(operands.size() - 1 );
+            operands.remove(operands.size() - 1);
             return stack.remove(stack.size() - 1);
         }
 
@@ -155,7 +154,7 @@ public class OTFSubSetFileTestCase extends OTFFileTestCase {
             if (maskLength > 0) {
                 return maskLength;
             }
-            return 1 + (hstemCount + vstemCount  - 1 ) / 8;
+            return 1 + (hstemCount + vstemCount  - 1) / 8;
         }
 
         public List<BytesNumber> getFullOperandsList() {
@@ -193,7 +192,8 @@ public class OTFSubSetFileTestCase extends OTFFileTestCase {
      * @return Returns a list of parsed operands and operators
      * @throws IOException
      */
-    private List<BytesNumber> getFullCharString(Context context, byte[] data, CFFDataReader cffData) throws IOException {
+    private List<BytesNumber> getFullCharString(Context context, byte[] data, CFFDataReader cffData)
+        throws IOException {
         CFFIndexData localIndexSubr = cffData.getLocalIndexSubr();
         CFFIndexData globalIndexSubr = cffData.getGlobalIndexSubr();
         boolean hasLocalSubroutines = localIndexSubr != null && localIndexSubr.getNumObjects() > 0;
