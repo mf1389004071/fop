@@ -154,7 +154,6 @@ public final class FontListMain {
             public void svgTextStrokedAsShapes(Object source, String fontFamily) {
                 // ignore
             }
-
         };
 
         FontListGenerator listGenerator = new FontListGenerator();

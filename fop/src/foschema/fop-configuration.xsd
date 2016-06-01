@@ -46,9 +46,9 @@
         <xsd:element name="image-loading" minOccurs="0">
           <xsd:complexType>
             <xsd:sequence>
-              <xsd:element name="penalty">
+              <xsd:element name="penalty" maxOccurs="unbounded" minOccurs="0">
                 <xsd:complexType>
-                  <xsd:attribute name="value" type="xsd:positiveInteger" use="required"/>
+                  <xsd:attribute name="value" type="xsd:string" use="required"/>
                   <xsd:attribute name="class" type="xsd:string" use="required"/>
                 </xsd:complexType>
               </xsd:element>
@@ -291,6 +291,7 @@
     <xsd:attribute name="embed-url-pfm" type="xsd:anyURI" use="optional"/>
     <xsd:attribute name="sub-font" type="xsd:string" use="optional"/>
     <xsd:attribute name="name" type="xsd:string" use="optional"/>
+    <xsd:attribute name="embed-as-type1" type="xsd:boolean" use="optional"/>
     <xsd:attribute name="embedding-mode" use="optional">
       <xsd:simpleType>
         <xsd:restriction base="xsd:string">
@@ -326,7 +327,7 @@
 
   <xsd:complexType name="referenceFontType">
     <xsd:sequence>
-      <xsd:element name="match">
+      <xsd:element name="match" maxOccurs="unbounded" minOccurs="1">
         <xsd:complexType>
           <xsd:attribute name="font-family" type="xsd:string" use="optional"/>
         </xsd:complexType>

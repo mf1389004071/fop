@@ -428,8 +428,7 @@ public class PSPainter extends AbstractIFPainter<PSDocumentHandler> {
                                         true);
                                 start = i;
                             }
-                            generator.writeln("/" + res.getName() + "." + encoding + " "
-                                    + generator.formatDouble(sizeMillipoints / 1000f) + " F");
+                            generator.useFont("/" + res.getName() + "." + encoding, sizeMillipoints / 1000f);
                             curEncoding = encoding;
                         }
                     }
@@ -579,13 +578,11 @@ public class PSPainter extends AbstractIFPainter<PSDocumentHandler> {
     private void useFont(String key, int size, boolean otf) throws IOException {
         PSFontResource res = getDocumentHandler().getPSResourceForFontKey(key);
         PSGenerator generator = getGenerator();
+        String name = "/" + res.getName();
         if (otf) {
-            String name = "/" + res.getName() + ".0";
-            generator.getCurrentState().useFont(name, size);
-            generator.writeln(name + ' ' + generator.formatDouble(size / 1000f) + " F");
-        } else {
-            generator.useFont("/" + res.getName(), size / 1000f);
+            name += ".0";
         }
+        generator.useFont(name, size / 1000f);
         res.notifyResourceUsageOnPage(generator.getResourceTracker());
     }
 }

@@ -86,4 +86,5 @@ public interface FontEventProducer extends EventProducer {
      * @event.severity WARN
      */
     void svgTextStrokedAsShapes(Object source, String fontFamily);
+
 }
