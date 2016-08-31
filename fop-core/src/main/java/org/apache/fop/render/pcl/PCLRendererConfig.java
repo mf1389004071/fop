@@ -29,10 +29,12 @@ import org.apache.fop.apps.FOUserAgent;
 import org.apache.fop.apps.MimeConstants;
 import org.apache.fop.fonts.DefaultFontConfig;
 import org.apache.fop.fonts.DefaultFontConfig.DefaultFontConfigParser;
+import org.apache.fop.fonts.FontEventAdapter;
 import org.apache.fop.render.RendererConfig;
 
 import static org.apache.fop.render.pcl.Java2DRendererOption.DISABLE_PJL;
 import static org.apache.fop.render.pcl.Java2DRendererOption.MODE_COLOR;
+import static org.apache.fop.render.pcl.Java2DRendererOption.OPTIMIZE_RESOURCES;
 import static org.apache.fop.render.pcl.Java2DRendererOption.RENDERING_MODE;
 import static org.apache.fop.render.pcl.Java2DRendererOption.TEXT_RENDERING;
 
@@ -70,6 +72,10 @@ public final class PCLRendererConfig implements RendererConfig {
         return getParam(MODE_COLOR, Boolean.class);
     }
 
+    public Boolean isOptimizeResources() {
+        return getParam(OPTIMIZE_RESOURCES, Boolean.class);
+    }
+
     private <T> T getParam(Java2DRendererOption option, Class<T> type) {
         assert option.getType().equals(type);
         return type.cast(params.get(option));
@@ -88,7 +94,8 @@ public final class PCLRendererConfig implements RendererConfig {
         /** {@inheritDoc} */
         public PCLRendererConfig build(FOUserAgent userAgent, Configuration cfg) throws FOPException {
             PCLRendererConfig config = new PCLRendererConfig(new DefaultFontConfigParser()
-                    .parse(cfg, userAgent.validateStrictly()));
+                    .parse(cfg, userAgent.validateStrictly(),
+                            new FontEventAdapter(userAgent.getEventBroadcaster())));
             configure(cfg, config);
             return config;
         }
@@ -122,6 +129,8 @@ public final class PCLRendererConfig implements RendererConfig {
                 }
                 config.setParam(DISABLE_PJL,
                         cfg.getChild(DISABLE_PJL.getName()).getValueAsBoolean(false));
+                config.setParam(OPTIMIZE_RESOURCES,
+                        cfg.getChild(OPTIMIZE_RESOURCES.getName()).getValueAsBoolean(false));
             }
         }
 
