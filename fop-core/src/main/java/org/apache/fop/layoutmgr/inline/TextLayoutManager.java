@@ -1321,7 +1321,7 @@ public class TextLayoutManager extends LeafNodeLayoutManager {
                     alignmentContext, notifyPos(mainPosition), false));
         } else {
             // adjustable letter spacing
-            int unsuppressibleLetterSpaces = suppressibleLetterSpace
+            int unsuppressibleLetterSpaces = (suppressibleLetterSpace &&  mapping.letterSpaceCount > 0)
                     ? mapping.letterSpaceCount - 1
                     : mapping.letterSpaceCount;
             baseList.add(new KnuthInlineBox(mapping.areaIPD.getOpt()
