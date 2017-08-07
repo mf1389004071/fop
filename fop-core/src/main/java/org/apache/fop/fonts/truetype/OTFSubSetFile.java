@@ -1128,9 +1128,20 @@ public class OTFSubSetFile extends OTFSubSetWriter {
     protected void updateOffset(byte[] out, int position, int length, int replacement) {
         switch (length) {
         case 1:
-            out[position] = (byte)(replacement + 139);
+            if (replacement >= -107 && replacement <= 107) {
+                out[position] = (byte)(replacement + 139);
+            } else {
+                throw new RuntimeException("replacement overflow");
+            }
             break;
         case 2:
+            if (replacement >= -107 && replacement <= 107) {
+                //Should use one byte encode
+                out[position] = (byte)(replacement + 139);
+                out[position + 1] = (byte) 32; // XXX don't known how to deal with this extra byte, put a one byte number. Should we shift the byte array?
+                log.warn("2 bytes encoding with value in 1 byte range", new RuntimeException());
+                break;
+            }
             if (replacement <= -876) {
                 out[position] = (byte)254;
             } else if (replacement <= -620) {
