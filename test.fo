@@ -129,6 +129,20 @@
                 縦中横（たてちゅうよこ）は、縦組みの文書の中で横組みすることである。読みは「たてちゅうよこ」であり、「たてなかよこ」ではない（JIS X 4051で規定）。縦組みの行の中で数文字（通常2、3文字。まれに4文字以上）の欧字や数字を、1文字分の高さで左横書きに配置する。
                 縦中横を用いる場合、前の文字と後ろの文字の間に空白は開けず、行の中心が、縦中横全体の中心にくるように文字を配置する。また、縦中横の中の文字数が多い場合、それぞれの文字の幅を文字数に応じて三分（さんぶ。通常の文字の幅の3分の1）や四分（しぶ。同4分の1）などとすることで、縦中横にした箇所の幅が前後の文字と揃うように配慮する。
             </fo:block>
+
+            <fo:block>
+                <fo:block space-after="5em">XSL-FOにはルビに関する仕様がありません。しかし、fo:inline-containerを使ってルビを表現することが可能です。</fo:block>
+
+                <fo:block font-size="18pt">XMLとは<fo:inline-container width="2em" text-indent="0mm" last-line-end-indent="0mm" alignment-baseline="central">
+                        <fo:block font-size="0.4em" text-align="center" line-height="1.2em" space-before="-1.5em" space-before.conditionality="retain">じょほう</fo:block>
+                        <fo:block line-height="1em">情報</fo:block>
+                </fo:inline-container>を<fo:inline-container width="2em" text-indent="0mm" last-line-end-indent="0mm" alignment-baseline="central">
+                    <fo:block font-size="0.4em" text-align="center" line-height="1.2em" space-before="-1.5em" space-before.conditionality="retain">ひょうげん</fo:block>
+                    <fo:block line-height="1em">表現</fo:block></fo:inline-container>するための<fo:inline-container width="1.2em" text-indent="0mm" last-line-end-indent="0mm" alignment-baseline="central">
+                    <fo:block font-size="0.4em" text-align="center" line-height="1.2em" space-before="-1.5em" space-before.conditionality="retain">あたら</fo:block>
+                    <fo:block line-height="1em">新</fo:block></fo:inline-container>しい<fo:inline-container width="2em" text-indent="0mm" last-line-end-indent="0mm" alignment-baseline="central">
+                    <fo:block font-size="0.4em" text-align="center" line-height="1.2em" space-before="-1.5em" space-before.conditionality="retain">ほうほう</fo:block>
+                    <fo:block line-height="1em">方法</fo:block></fo:inline-container>です。</fo:block></fo:block>
         </fo:flow>
     </fo:page-sequence>
 </fo:root>
