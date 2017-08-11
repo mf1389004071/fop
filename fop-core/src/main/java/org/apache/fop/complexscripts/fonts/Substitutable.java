@@ -50,7 +50,7 @@ public interface Substitutable {
      * @return output sequence (represented as a character sequence, where each character in the returned sequence
      * denotes "font characters", i.e., character codes that map directly (1-1) to their associated glyphs
      */
-    CharSequence performSubstitution(CharSequence cs, String script, String language, List associations, boolean retainControls);
+    CharSequence performSubstitution(CharSequence cs, String script, String language, List associations, boolean retainControls, boolean isVertical);
 
     /**
      * Reorder combining marks in character sequence so that they precede (within the sequence) the base
@@ -64,6 +64,6 @@ public interface Substitutable {
      * @param associations optional list of associations to be reordered
      * @return output sequence containing reordered "font characters"
      */
-    CharSequence reorderCombiningMarks(CharSequence cs, int[][] gpa, String script, String language, List associations);
+    CharSequence reorderCombiningMarks(CharSequence cs, int[][] gpa, String script, String language, List associations, boolean isVertical);
 
 }

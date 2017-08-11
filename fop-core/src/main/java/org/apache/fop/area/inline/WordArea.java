@@ -55,6 +55,8 @@ public class WordArea extends InlineArea {
      */
     protected boolean reversed;
 
+
+    protected boolean upright;
     /**
      * Create a word area
      * @param blockProgressionOffset the offset for this area
@@ -132,6 +134,23 @@ public class WordArea extends InlineArea {
         }
     }
 
+    /**
+     * CJK Glyph keep upright in vertical mode
+     *
+     * @return if the word should rotate to upright
+     */
+    public boolean isUpright() {
+        return upright;
+    }
+
+    /**
+     * CJK Glyph keep upright in vertical mode
+     *
+     * @param upright
+     */
+    public void setUpright(boolean upright) {
+        this.upright = upright;
+    }
     /**
      * <p>Obtain per-character (glyph) level at a specified index position.</p>
      * <p>If word has been reversed, then the position is relative to the reversed word.</p>

@@ -227,17 +227,18 @@ public abstract class ScriptProcessor {
      * @param script a script identifier
      * @return a script processor instance or null if none found
      */
-    public static synchronized ScriptProcessor getInstance(String script, Map<String, ScriptProcessor> processors) {
+    public static synchronized ScriptProcessor getInstance(String script, boolean isVertical, Map<String, ScriptProcessor> processors) {
         ScriptProcessor sp = null;
         assert processors != null;
-        if ((sp = processors.get(script)) == null) {
-            processors.put(script, sp = createProcessor(script));
+        String key = isVertical ? script + "_vert" : script;
+        if ((sp = processors.get(key)) == null) {
+            processors.put(key, sp = createProcessor(script, isVertical));
         }
         return sp;
     }
 
     // [TBD] - rework to provide more configurable binding between script name and script processor constructor
-    private static ScriptProcessor createProcessor(String script) {
+    private static ScriptProcessor createProcessor(String script, boolean isVertical) {
         ScriptProcessor sp = null;
         int sc = CharScript.scriptCodeFromTag(script);
         if (sc == CharScript.SCRIPT_ARABIC) {
@@ -245,7 +246,7 @@ public abstract class ScriptProcessor {
         } else if (CharScript.isIndicScript(sc)) {
             sp = IndicScriptProcessor.makeProcessor(script);
         } else {
-            sp = new DefaultScriptProcessor(script);
+            sp = new DefaultScriptProcessor(script, isVertical);
         }
         return sp;
     }

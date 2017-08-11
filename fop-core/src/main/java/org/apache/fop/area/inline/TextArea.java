@@ -63,7 +63,7 @@ public class TextArea extends AbstractTextArea {
      * @param offset the offset for the next area
      */
     public void addWord(String word, int offset) {
-        addWord(word, 0, null, null, null, offset);
+        addWord(word, 0, null, null, null, offset, false);
     }
 
     /**
@@ -74,7 +74,7 @@ public class TextArea extends AbstractTextArea {
      * @param level  bidirectional level that applies to entire word
      */
     public void addWord(String word, int offset, int level) {
-        addWord(word, 0, null, makeLevels(level, word.length()), null, offset);
+        addWord(word, 0, null, makeLevels(level, word.length()), null, offset, false);
     }
 
     /**
@@ -90,13 +90,14 @@ public class TextArea extends AbstractTextArea {
      */
     public void addWord(
         String word, int ipd, int[] letterAdjust, int[] levels,
-          int[][] gposAdjustments, int blockProgressionOffset) {
+          int[][] gposAdjustments, int blockProgressionOffset, boolean isUpright) {
         int minWordLevel = findMinLevel(levels, getBidiLevel());
         WordArea wordArea = new WordArea(
             blockProgressionOffset, minWordLevel, word, letterAdjust, levels, gposAdjustments);
         wordArea.setIPD(ipd);
         addChildArea(wordArea);
         wordArea.setParentArea(this);
+        wordArea.setUpright(isUpright);
         updateLevel(minWordLevel);
     }
 

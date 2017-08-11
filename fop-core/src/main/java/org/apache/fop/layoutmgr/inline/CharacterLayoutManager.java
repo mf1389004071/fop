@@ -87,7 +87,7 @@ public class CharacterLayoutManager extends LeafNodeLayoutManager {
             }
         } else {
             int[] levels = (level >= 0) ? new int[] {level} : null;
-            text.addWord(String.valueOf(ch), ipd, null, levels, null, blockProgressionOffset);
+            text.addWord(String.valueOf(ch), ipd, null, levels, null, blockProgressionOffset, false);
         }
 
         TraitSetter.setProducerID(text, fobj.getId());

@@ -101,8 +101,8 @@ public class GlyphDefinitionTable extends GlyphTable {
      * @param language a language identifier
      * @return the reordered (output) glyph sequence
      */
-    public GlyphSequence reorderCombiningMarks(GlyphSequence gs, int[] widths, int[][] gpa, String script, String language) {
-        ScriptProcessor sp = ScriptProcessor.getInstance(script, processors);
+    public GlyphSequence reorderCombiningMarks(GlyphSequence gs, int[] widths, int[][] gpa, String script, String language, boolean isVertical) {
+        ScriptProcessor sp = ScriptProcessor.getInstance(script, isVertical, processors);
         return sp.reorderCombiningMarks(this, gs, widths, gpa, script, language);
     }
 

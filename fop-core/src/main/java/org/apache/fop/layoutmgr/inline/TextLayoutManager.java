@@ -30,6 +30,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.apache.fop.area.Trait;
 import org.apache.fop.area.inline.TextArea;
+import org.apache.fop.complexscripts.util.Characters;
 import org.apache.fop.fo.Constants;
 import org.apache.fop.fo.FOText;
 import org.apache.fop.fonts.Font;
@@ -457,7 +458,7 @@ public class TextLayoutManager extends LeafNodeLayoutManager {
                     }
                     wordCharLength += mapping.getWordLength();
                     if (isWordEnd(wordIndex)) {
-                        addWord(mappingIndex, wordIndex, wordCharLength);
+                        addWord(mappingIndex, wordIndex, wordCharLength); //isUpright detect is cjk in vertical mode
                         mappingIndex = -1;
                     }
                 }
@@ -465,7 +466,7 @@ public class TextLayoutManager extends LeafNodeLayoutManager {
         }
 
         private boolean isWordEnd(int mappingIndex) {
-            return mappingIndex == lastIndex || getGlyphMapping(mappingIndex + 1).isSpace;
+            return mappingIndex == lastIndex || getGlyphMapping(mappingIndex + 1).isSpace || getGlyphMapping(mappingIndex + 1).isUpright || mapping.isUpright; //TODO If is vertical mode and GlyphMapping is hani, return true.
         }
 
         /**
@@ -489,8 +490,10 @@ public class TextLayoutManager extends LeafNodeLayoutManager {
             initWord(wordLength);
             // iterate over word's fragments, adding word chars (with bidi
             // levels), letter space adjustments, and glyph position adjustments
+            boolean isUpright = false;
             for (int i = startIndex; i <= endIndex; i++) {
                 GlyphMapping wordMapping = getGlyphMapping(i);
+                isUpright = isUpright || wordMapping.isUpright ;
                 addWordChars(wordMapping);
                 addLetterAdjust(wordMapping);
                 if (addGlyphPositionAdjustments(wordMapping)) {
@@ -505,7 +508,7 @@ public class TextLayoutManager extends LeafNodeLayoutManager {
                 gposAdjustments = null;
             }
             textArea.addWord(wordChars.toString(), wordIPD, letterSpaceAdjust,
-                             getNonEmptyLevels(), gposAdjustments, blockProgressionOffset);
+                             getNonEmptyLevels(), gposAdjustments, blockProgressionOffset, isUpright);
         }
 
         private int[] getNonEmptyLevels() {
@@ -765,6 +768,9 @@ public class TextLayoutManager extends LeafNodeLayoutManager {
         int level = -1;
         int prevLevel = -1;
         boolean retainControls = false;
+        boolean isVertical =  context.getWritingMode().isVertical();
+        boolean prevCharIsUpright = false;
+        boolean inUpright = false;
         while (nextStart < foText.length()) {
             ch = foText.charAt(nextStart);
             level = foText.bidiLevelAt(nextStart);
@@ -796,14 +802,18 @@ public class TextLayoutManager extends LeafNodeLayoutManager {
                             + ", inSpace = " + inWhitespace
                             + "}");
             }
+            if (isVertical) {
+                inUpright = prevCharIsUpright || (prevCharIsUpright = Characters.isUprightOrientation(ch));
+            }
             if (inWord) {
                 if (breakOpportunity
                      || GlyphMapping.isSpace(ch)
                      || CharUtilities.isExplicitBreak(ch)
-                     || ((prevLevel != -1) && (level != prevLevel))) {
+                     || ((prevLevel != -1) && (level != prevLevel))
+                     || inUpright) {
                     // this.foText.charAt(lastIndex) == CharUtilities.SOFT_HYPHEN
                     prevMapping = processWord(alignment, sequence, prevMapping, ch,
-                        breakOpportunity, true, prevLevel, retainControls);
+                        breakOpportunity, true, prevLevel, retainControls, context.getWritingMode().isVertical());
                 }
             } else if (inWhitespace) {
                 if (ch != CharUtilities.SPACE || breakOpportunity) {
@@ -854,7 +864,7 @@ public class TextLayoutManager extends LeafNodeLayoutManager {
 
         // Process any last elements
         if (inWord) {
-            processWord(alignment, sequence, prevMapping, ch, false, false, prevLevel, retainControls);
+            processWord(alignment, sequence, prevMapping, ch, false, false, prevLevel, retainControls, context.getWritingMode().isVertical());
         } else if (inWhitespace) {
             processWhitespace(alignment, sequence, !keepTogether, prevLevel);
         } else if (mapping != null) {
@@ -921,8 +931,8 @@ public class TextLayoutManager extends LeafNodeLayoutManager {
     }
 
     private GlyphMapping processWord(final int alignment, final KnuthSequence sequence,
-            GlyphMapping prevMapping, final char ch, final boolean breakOpportunity,
-            final boolean checkEndsWithHyphen, int level, boolean retainControls) {
+                                     GlyphMapping prevMapping, final char ch, final boolean breakOpportunity,
+                                     final boolean checkEndsWithHyphen, int level, boolean retainControls, boolean isVertical) {
 
         //Word boundary found, process widths and kerning
         int lastIndex = nextStart;
@@ -938,7 +948,7 @@ public class TextLayoutManager extends LeafNodeLayoutManager {
                 && prevMapping.endIndex > 0 ? foText.charAt(prevMapping.endIndex - 1) : 0;
         GlyphMapping mapping = GlyphMapping.doGlyphMapping(foText, thisStart, lastIndex, font,
                 letterSpaceIPD, letterSpaceAdjustArray, precedingChar, breakOpportunityChar,
-                endsWithHyphen, level, false, false, retainControls);
+                endsWithHyphen, level, false, false, retainControls, isVertical);
         prevMapping = mapping;
         addGlyphMapping(mapping);
         tempStart = nextStart;

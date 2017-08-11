@@ -93,11 +93,11 @@ public class GlyphSubstitutionTable extends GlyphTable {
      * @param language a language identifier
      * @return the substituted (output) glyph sequence
      */
-    public GlyphSequence substitute(GlyphSequence gs, String script, String language) {
+    public GlyphSequence substitute(GlyphSequence gs, String script, String language, boolean isVertical) {
         GlyphSequence ogs;
         Map<LookupSpec, List<LookupTable>> lookups = matchLookups(script, language, "*");
         if ((lookups != null) && (lookups.size() > 0)) {
-            ScriptProcessor sp = ScriptProcessor.getInstance(script, processors);
+            ScriptProcessor sp = ScriptProcessor.getInstance(script, isVertical, processors);
             ogs = sp.substitute(this, gs, script, language, lookups);
         } else {
             ogs = gs;
